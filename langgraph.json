@@ -1,0 +1,8 @@
+{
+  "$schema": "https://langgra.ph/schema.json",
+  "dependencies": ["."],
+  "graphs": {
+    "refund_risk_agent": "./agents/refund_agent.py:supervisor"
+  },
+  "env": ".env"
+}
