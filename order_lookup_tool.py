@@ -22,7 +22,7 @@ import pandas as pd
 import requests
 from langchain_core.tools import tool
 
-from config.settings import load_settings
+from settings import load_settings
 
 logger = logging.getLogger(__name__)
 

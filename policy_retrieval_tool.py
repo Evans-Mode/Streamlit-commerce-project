@@ -13,12 +13,12 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Any, cast
 
 from pinecone import Pinecone
 from langchain_core.tools import tool
 
-from config.settings import load_settings
+from settings import load_settings
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +52,10 @@ def retrieve_policy(query: str) -> str:
 
     try:
         index = _pc_index(cfg)
-        results = index.search(
+        results = index.query(
             namespace=cfg.pinecone_namespace,
-            query={"inputs": {"text": query}, "top_k": TOP_K},
+            vector=query,
+            top_k=TOP_K,
         )
     except Exception as exc:
         logger.error("Pinecone search error: %s", exc)

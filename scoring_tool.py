@@ -23,7 +23,7 @@ from typing import Any
 import boto3
 from langchain_core.tools import tool
 
-from config.settings import load_settings
+from settings import load_settings
 
 logger = logging.getLogger(__name__)
 
@@ -130,12 +130,12 @@ def score_refund_risk(features_json: str) -> str:
     try:
         runtime = boto3.client(
             "sagemaker-runtime",
-            region_name=cfg.AWS_REGION,
-            aws_access_key_id=cfg.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=cfg.AWS_SECRET_ACCESS_KEY,
+            region_name=cfg.aws_region,
+            aws_access_key_id=cfg.aws_access_key_id,
+            aws_secret_access_key=cfg.aws_secret_access_key,
         )
         response = runtime.invoke_endpoint(
-            EndpointName=cfg.SAGEMAKER_ENDPOINT_NAME,
+            EndpointName=cfg.sagemaker_endpoint_name,
             ContentType="text/csv",
             Body=csv_payload,
         )
@@ -157,6 +157,6 @@ def score_refund_risk(features_json: str) -> str:
             "refund_probability": round(prob, 4),
             "risk_tier": risk_tier,
             "threshold_used": 0.50,
-            "model": cfg.SAGEMAKER_ENDPOINT_NAME,
+            "model": cfg.sagemaker_endpoint_name,
         }
     )

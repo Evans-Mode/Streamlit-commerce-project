@@ -15,7 +15,7 @@ import logging
 
 from langchain_core.tools import tool
 
-from tools.policy_retrieval_tool import retrieve_policy
+from policy_retrieval_tool import retrieve_policy
 
 logger = logging.getLogger(__name__)
 

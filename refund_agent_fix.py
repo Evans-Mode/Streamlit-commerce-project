@@ -19,18 +19,21 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import tool
+from typing import TypedDict, Literal
+from langgraph.graph import StateGraph, START, END
+from langchain.chat_models import init_chat_model
 
-from config.settings import load_settings
-from tools.order_lookup_tool import lookup_order, lookup_user_orders
-from tools.policy_retrieval_tool import retrieve_policy
-from tools.product_help_tool import get_product_help
-from tools.scoring_tool import score_refund_risk
+from settings import load_settings
+from order_lookup_tool import lookup_order, lookup_user_orders
+from policy_retrieval_tool import retrieve_policy
+from product_help_tool import get_product_help
+from scoring_tool import score_refund_risk
 
 load_dotenv()
 logger = logging.getLogger(__name__)
 
 cfg = load_settings()
-MODEL = cfg.bedrock_model_id  # e.g. "bedrock:us.amazon.nova-2-lite-v1:0"
+MODEL = init_chat_model(cfg.bedrock_model_id, model_provider="bedrock")  # e.g. "bedrock:us.amazon.nova-2-lite-v1:0"
 
 # ── System prompt (internal operator role per task guidelines) ─────────────────
 SYSTEM_PROMPT = """You are an internal refund-risk analyst for the Generic E-Commerce Company.
@@ -89,7 +92,7 @@ CRITICAL: Return every chunk_text with its chunk_index. Do not add any policy no
 # ── Tool wrappers (W6 pattern) ─────────────────────────────────────────────────
 
 @tool
-def run_scoring(features_json: str) -> str:
+def run_scoring(features: str) -> str:
     """Score refund risk for a customer order.
 
     Use for: any request that needs a refund probability or risk tier.
@@ -97,7 +100,7 @@ def run_scoring(features_json: str) -> str:
     Do NOT use for policy questions or order lookups.
     """
     result = scorer_agent.invoke(
-        {"messages": [{"role": "user", "content": features_json}]}
+        {"messages": [{"role": "user", "content": features}]}
     )
     return result["messages"][-1].content
 
@@ -213,7 +216,15 @@ def run_agent(
     prior: list[dict] = history or []
     messages = prior + [{"role": "user", "content": user_message}]
 
-    result = supervisor.invoke({"messages": messages})
+    # Convert messages to BaseMessage objects for LangChain compatibility
+    message_objects = []
+    for msg in messages:
+        if msg["role"] == "user":
+            message_objects.append(HumanMessage(content=msg["content"]))
+        elif msg["role"] == "assistant":
+            message_objects.append(AIMessage(content=msg["content"]))
+
+    result = supervisor.invoke({"messages": message_objects})
     all_messages = result["messages"]
 
     final_answer = ""
