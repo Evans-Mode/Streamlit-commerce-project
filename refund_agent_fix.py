@@ -55,7 +55,9 @@ RULES:
 6. MEMORY    — Use conversation history for follow-ups ("that order", "score it", "compare with…").
 
 CRITICAL: Include ALL findings (score, order facts, policy citations) in your final response.
-The Streamlit UI only surfaces your last message."""
+The Streamlit UI only surfaces your last message. Also keep output to strings and only what the user needs to know
+to make a decision — avoid internal reasoning traces or tool-result dumps in the final answer. Keep answers concise to a max
+of 300 tokens."""
 
 # ── Sub-agent: scorer ─────────────────────────────────────────────────────────
 scorer_agent = create_agent(
