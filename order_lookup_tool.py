@@ -61,10 +61,10 @@ def _read_parquet_from_volume(host: str, token: str, file_path: str) -> pd.DataF
 
 def _load_transactions(cfg) -> pd.DataFrame:
     """Load all parquet files from the volume into one DataFrame."""
-    files = _list_parquet_files(cfg.DATABRICKS_HOST, cfg.access_token, cfg.DATABRICKS_VOLUME_PATH)
+    files = _list_parquet_files(cfg.databricks_host, cfg.access_token, cfg.databricks_volume_path)
     if not files:
         return pd.DataFrame()
-    dfs = [_read_parquet_from_volume(cfg.DATABRICKS_HOST, cfg.access_token, fp) for fp in files]
+    dfs = [_read_parquet_from_volume(cfg.databricks_host, cfg.access_token, fp) for fp in files]
     return pd.concat(dfs, ignore_index=True)
 
 
