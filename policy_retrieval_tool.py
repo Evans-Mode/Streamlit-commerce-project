@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, cast
+from typing import Any
 
 from pinecone import Pinecone
 from langchain_core.tools import tool
@@ -22,13 +22,15 @@ from settings import load_settings
 
 logger = logging.getLogger(__name__)
 
+cfg = load_settings()
+
 # Number of top chunks to retrieve per query
 TOP_K = 5
 
 
 def _pc_index(cfg):
-    pc = Pinecone(api_key=cfg.PINECONE_API_KEY)
-    return pc.Index(host=cfg.PINECONE_INDEX_HOST)
+    pc = Pinecone(api_key=cfg.pinecone_api_key)
+    return pc.Index(host=cfg.pinecone_index_host)
 
 
 @tool
@@ -48,14 +50,12 @@ def retrieve_policy(query: str) -> str:
         JSON string with a list of {chunk_text, chunk_index, source, score}
         objects ordered by relevance.
     """
-    cfg = load_settings()
 
     try:
         index = _pc_index(cfg)
-        results = index.query(
+        results = index.search(
             namespace=cfg.pinecone_namespace,
-            vector=query,
-            top_k=TOP_K,
+            query={"inputs": {"text": query}, "top_k": TOP_K},
         )
     except Exception as exc:
         logger.error("Pinecone search error: %s", exc)

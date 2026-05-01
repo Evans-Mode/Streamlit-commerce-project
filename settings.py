@@ -21,7 +21,7 @@ class Settings:
     # bedrock_model_id is read from BEDROCK_MODEL_ID in .env
     # Recommended value: bedrock:us.amazon.nova-lite-v1:0
     bedrock_model_id: str
-
+    kimi_api_key : str
     # ── LangSmith ─────────────────────────────────────────────────────────────
     # These are read by LangChain automatically from env — stored here for
     # the startup connectivity check in refund_agent.py only.
@@ -67,4 +67,5 @@ def load_settings() -> Settings:
             "DATABRICKS_VOLUME_PATH",
             "/Volumes/project_3/datalake/gold_zone/transaction_fact/",
         ),
+        kimi_api_key              = os.environ.get("KIMI_API_KEY", ""),
     )

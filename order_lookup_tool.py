@@ -3,8 +3,6 @@
 Fetches order / transaction data from the Databricks Unity Catalog Volume
 using the Files API pattern from databricks_parquet.ipynb.
 
-Volume path: /Volumes/project_3/datalake/gold_zone/transaction_fact/
-Schema (from notebook head(10)):
   transaction_id, user_id, transaction_type, timestamp, status,
   payment_method, currency, subtotal, tax, total,
   billing_address_id, shipping_address_id
@@ -23,6 +21,7 @@ import requests
 from langchain_core.tools import tool
 
 from settings import load_settings
+cfg = load_settings()
 
 logger = logging.getLogger(__name__)
 
@@ -61,10 +60,10 @@ def _read_parquet_from_volume(host: str, token: str, file_path: str) -> pd.DataF
 
 def _load_transactions(cfg) -> pd.DataFrame:
     """Load all parquet files from the volume into one DataFrame."""
-    files = _list_parquet_files(cfg.DATABRICKS_HOST, cfg.access_token, cfg.DATABRICKS_VOLUME_PATH)
+    files = _list_parquet_files(cfg.databricks_host, cfg.access_token, cfg.databricks_volume_path)
     if not files:
         return pd.DataFrame()
-    dfs = [_read_parquet_from_volume(cfg.DATABRICKS_HOST, cfg.access_token, fp) for fp in files]
+    dfs = [_read_parquet_from_volume(cfg.databricks_host, cfg.access_token, fp) for fp in files]
     return pd.concat(dfs, ignore_index=True)
 
 
@@ -80,7 +79,6 @@ def lookup_order(transaction_id: str) -> str:
     Returns:
         JSON string with all transaction fields, or an error message.
     """
-    cfg = load_settings()
 
     try:
         df = _load_transactions(cfg)
@@ -117,7 +115,6 @@ def lookup_user_orders(user_id: str, limit: int = 10) -> str:
     Returns:
         JSON string with a list of transactions and summary stats.
     """
-    cfg = load_settings()
 
     try:
         df = _load_transactions(cfg)
